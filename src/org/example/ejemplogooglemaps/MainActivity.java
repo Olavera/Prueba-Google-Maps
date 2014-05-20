@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -24,13 +25,17 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MainActivity   extends FragmentActivity implements OnMapClickListener, OnInfoWindowClickListener{
 
 	private GoogleMap mapa;
+	private Vector<Punto> points;
+	private RetrieveFeed task;
+	//private LocationClient mLocationClient;
 
 	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initilizeMap();
-		loadPoints();
+		task = new RetrieveFeed();
+		task.execute();
 	}
 
     // Inflate the menu items for use in the action bar
@@ -72,7 +77,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		}
 	}
 
-	private void loadPoints(){
+	/*private void loadPoints(){
 
 		ParserXML_DOM parser = new ParserXML_DOM(this);
 		Vector<Punto> vp = parser.listaPuntos();
@@ -95,7 +100,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 				.icon(BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 		}
-	}
+	}*/
 
 	public void guardarCoche(View view) {
 		ParserXML_DOM parser = new ParserXML_DOM(getApplicationContext());
@@ -103,7 +108,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		parser.guardarPunto("Coche", new LatLng(mapa.getCameraPosition().target.latitude,
 				mapa.getCameraPosition().target.longitude));
 
-		loadPoints();
+		task.execute();
 	}
 
 	@Override
@@ -112,7 +117,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 		parser.guardarPunto("prueba", puntoPulsado);
 
-		loadPoints();
+		task.execute();
 	}
 
 	@Override
@@ -121,8 +126,43 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 		parser.eliminarPunto(marker.getTitle(), marker.getPosition());
 
-		loadPoints();
+		task.execute();
 		
+	}
+	
+	private class RetrieveFeed extends android.os.AsyncTask<String,Integer,Boolean> {
+
+
+		protected Boolean doInBackground(String... params) {
+
+			ParserXML_DOM parser = new ParserXML_DOM(getApplicationContext());
+			points = parser.listaPuntos();
+			
+			return true;
+		}
+
+		protected void onPostExecute(Boolean result) {
+			
+			mapa.clear();
+
+			for (Punto punto : points) {
+				if (punto.getNombre().equals("Coche"))
+					mapa.addMarker(new MarkerOptions()
+					.position(punto.getCords())
+					.title(punto.getNombre())
+					.snippet(punto.getNombre())
+					.icon(BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+				else
+					mapa.addMarker(new MarkerOptions()
+					.position(punto.getCords())
+					.title(punto.getNombre())
+					.snippet(punto.getNombre())
+					.icon(BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+			}
+		}
+
 	}
 
 
