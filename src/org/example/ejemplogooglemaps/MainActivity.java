@@ -15,7 +15,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -26,7 +25,6 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 	private GoogleMap mapa;
 	private Vector<Punto> points;
-	private RetrieveFeed task;
 	//private LocationClient mLocationClient;
 
 	@Override 
@@ -34,8 +32,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		initilizeMap();
-		task = new RetrieveFeed();
-		task.execute();
+		iniciarTask();
 	}
 
     // Inflate the menu items for use in the action bar
@@ -76,31 +73,11 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 		}
 	}
-
-	/*private void loadPoints(){
-
-		ParserXML_DOM parser = new ParserXML_DOM(this);
-		Vector<Punto> vp = parser.listaPuntos();
-
-		mapa.clear();
-
-		for (Punto punto : vp) {
-			if (punto.getNombre().equals("Coche"))
-				mapa.addMarker(new MarkerOptions()
-				.position(punto.getCords())
-				.title(punto.getNombre())
-				.snippet(punto.getNombre())
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-			else
-				mapa.addMarker(new MarkerOptions()
-				.position(punto.getCords())
-				.title(punto.getNombre())
-				.snippet(punto.getNombre())
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-		}
-	}*/
+	
+	public void iniciarTask(){
+		RetrieveFeed task = new RetrieveFeed();
+		task.execute();
+	}
 
 	public void guardarCoche(View view) {
 		ParserXML_DOM parser = new ParserXML_DOM(getApplicationContext());
@@ -108,7 +85,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		parser.guardarPunto("Coche", new LatLng(mapa.getCameraPosition().target.latitude,
 				mapa.getCameraPosition().target.longitude));
 
-		task.execute();
+		iniciarTask();
 	}
 
 	@Override
@@ -117,7 +94,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 		parser.guardarPunto("prueba", puntoPulsado);
 
-		task.execute();
+		iniciarTask();
 	}
 
 	@Override
@@ -126,7 +103,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 		parser.eliminarPunto(marker.getTitle(), marker.getPosition());
 
-		task.execute();
+		iniciarTask();
 		
 	}
 	
