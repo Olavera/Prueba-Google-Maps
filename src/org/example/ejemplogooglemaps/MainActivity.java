@@ -74,7 +74,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		}
 	}
 	
-	public void iniciarTask(){
+	private void iniciarTask(){
 		RetrieveFeed task = new RetrieveFeed();
 		task.execute();
 	}
