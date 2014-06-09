@@ -1,8 +1,17 @@
 package org.example.ejemplogooglemaps;
 
-
+import java.util.ArrayList;
 import java.util.Vector;
 
+
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -10,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -25,6 +33,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 
 	private GoogleMap mapa;
 	private Vector<Punto> points;
+    Httppostaux post;
 	//private LocationClient mLocationClient;
 
 	@Override 
@@ -33,6 +42,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		setContentView(R.layout.activity_main);
 		initilizeMap();
 		iniciarTask();
+		post = new Httppostaux();
 	}
 
     // Inflate the menu items for use in the action bar
@@ -107,6 +117,13 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		
 	}
 	
+
+	
+	public void validar(View view) {
+			
+		new asynclogin().execute("usuarioA","contraseñaA"); 
+	} 
+	
 	private class RetrieveFeed extends android.os.AsyncTask<String,Integer,Boolean> {
 
 
@@ -141,6 +158,212 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 		}
 
 	}
+    
+    private class asynclogin extends AsyncTask< String, String, String > {
+   	 
+    	String user,pass;
+ 
+		protected String doInBackground(String... params) {
+			//obtnemos usr y pass
+			user=params[0];
+			pass=params[1];
+			
+			int id=-1;
+			boolean bandera;
+	    	
+	    	/*Creamos un ArrayList del tipo nombre valor para agregar los datos recibidos por los parametros anteriores
+	    	 * y enviarlo mediante POST a nuestro sistema para relizar la validacion*/ 
+	    	ArrayList<NameValuePair> postparameters2send= new ArrayList<NameValuePair>();
+	     		
+			    		postparameters2send.add(new BasicNameValuePair("email",user));
+			    		postparameters2send.add(new BasicNameValuePair("pass",pass));
+
+			   //realizamos una peticion y como respuesta obtenes un array JSON
+	      		JSONArray jdata=post.getserverdata(postparameters2send, "http://padandroid.webcindario.com/index2.php");
+
+			    //si lo que obtuvimos no es null
+			    	if (jdata!=null && jdata.length() > 0){
+
+			    		JSONObject json_data; //creamos un objeto JSON
+						try {
+							json_data = jdata.getJSONObject(0); //leemos el primer segmento en nuestro caso el unico
+							 id=json_data.getInt("id");//accedemos al valor 
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}		            
+
+						//validamos el valor obtenido
+			    		 if (id==(-1)){
+			    			 Toast.makeText(getBaseContext(),
+										"Usuario incorrecto. ", Toast.LENGTH_SHORT)
+										.show();
+			    			 bandera=false;
+			    		 }
+			    		 else if (id==1){
+			    			 Toast.makeText(getBaseContext(),
+										"Usuario correcto. ", Toast.LENGTH_SHORT)
+										.show();
+			    			 bandera=true;
+			    		 }
+			    		 else{
+			    			 Toast.makeText(getBaseContext(),
+										"Ni puta idea de porque salta aqui", Toast.LENGTH_SHORT)
+										.show();
+			    			 bandera=false;
+			    		 }
+
+				  }else{	//json obtenido invalido verificar parte WEB.
+					  Toast.makeText(getBaseContext(),
+								"JSON obtenido invalido.", Toast.LENGTH_SHORT)
+								.show();
+					  bandera=false;
+				  }
+			
+			
+			
+            
+			//enviamos y recibimos y analizamos los datos en segundo plano.
+    		if (bandera==true){    		    		
+    			return "ok"; //login valido
+    		}else{    		
+    			return "err"; //login invalido     	          	  
+    		}
+        	
+		}
+       
+
+        protected void onPostExecute(String result) {
+           
+           if (result.equals("ok")){
+
+        	   Toast.makeText(getBaseContext(),
+						"LLegue al post execute bien", Toast.LENGTH_SHORT)
+						.show();
+
+            }else{
+            	Toast.makeText(getBaseContext(),
+						"Falle en el postexecute", Toast.LENGTH_SHORT)
+						.show();
+            }
+            
+       }
+
+    }
+
+/*	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void validar(View v) {
+		ArrayList parametros = new ArrayList();
+		parametros.add("email");
+		parametros.add("roberto");
+		parametros.add("pass");
+		parametros.add("morgan");
+		// Llamada a Servidor Web PHP
+		try {
+			Post post = new Post();
+			JSONArray datos = post.getServerData(parametros,
+					"http://padandroid.webcindario.com/index2.php");
+			// No se puede poner localhost, carga la consola de Windows
+			// y escribe ipconfig/all para ver tu IP
+			if (datos != null && datos.length() > 0) {
+				JSONObject json_data = datos.getJSONObject(0);
+				int numRegistrados = json_data.getInt("id");
+				if (numRegistrados == 1) {
+					Toast.makeText(getBaseContext(),
+							"Usuario correcto. ", Toast.LENGTH_SHORT)
+							.show();
+				}
+			} else {
+				Toast.makeText(getBaseContext(),
+						"Usuario incorrecto. ", Toast.LENGTH_SHORT)
+						.show();
+			}
+		} catch (Exception e) {
+			Toast.makeText(getBaseContext(),
+					"Error al conectar con el servidor. ",
+					Toast.LENGTH_SHORT).show();
+		}
+		// FIN Llamada a Servidor Web PHP
+	}
+
+	class Post {
+		private InputStream is = null;
+		private String respuesta = "";
+
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		private void conectaPost(ArrayList parametros, String URL) {
+			ArrayList nameValuePairs;
+			try {
+
+				HttpClient httpclient = new DefaultHttpClient();
+
+				HttpPost httppost = new HttpPost(URL);
+				nameValuePairs = new ArrayList();
+
+				if (parametros != null) {
+					for (int i = 0; i < parametros.size() - 1; i += 2) {
+						nameValuePairs.add(new BasicNameValuePair((String)parametros.get(i), (String)parametros.get(i + 1)));
+					}
+					httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				}
+				HttpResponse response = httpclient.execute(httppost);
+				HttpEntity entity = response.getEntity();
+				is = entity.getContent();
+			} catch (Exception e) {
+
+				Log.e("log_tag", "Error in http connection " + e.toString());
+
+			} finally {
+
+			}
+		}
+
+		private void getRespuestaPost() {
+			try {
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(is, "iso-8859-1"), 8);
+				StringBuilder sb = new StringBuilder();
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					sb.append(line + "\n");
+				}
+				is.close();
+				respuesta = sb.toString();
+				Log.e("log_tag", "Cadena JSon " + respuesta);
+			} catch (Exception e) {
+
+				Log.e("log_tag", "Error converting result " + e.toString());
+
+			}
+		}
+
+		@SuppressWarnings("finally")
+		private JSONArray getJsonArray() {
+			JSONArray jArray = null;
+			try {
+
+				jArray = new JSONArray(respuesta);
+
+			} catch (Exception e) {
+
+			} finally {
+				return jArray;
+			}
+		}
+
+		@SuppressWarnings("rawtypes")
+		public JSONArray getServerData(ArrayList parametros, String URL) {
+			conectaPost(parametros, URL);
+			if (is != null) {
+				getRespuestaPost();
+			}
+			if (respuesta != null && respuesta.trim() != "") {
+				return getJsonArray();
+			} else {
+				return null;
+			}
+		}
+	}*/
 
 
 

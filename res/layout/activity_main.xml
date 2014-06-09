@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/btndifundir"
-        android:onClick="guardarCoche"
+        android:onClick="validar"
         android:text="Save" />
 
     <Button
