@@ -202,7 +202,7 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 			    		 }
 			    		 else if (id==1){
 			    			 Toast.makeText(getBaseContext(),
-										"Usuario correcto. ", Toast.LENGTH_SHORT)
+										"Usuario correcto llega al servicio. ", Toast.LENGTH_SHORT)
 										.show();
 			    			 bandera=true;
 			    		 }
