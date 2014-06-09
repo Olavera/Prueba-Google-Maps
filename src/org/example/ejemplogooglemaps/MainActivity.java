@@ -169,7 +169,6 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 			pass=params[1];
 			
 			int id=-1;
-			boolean bandera;
 	    	
 	    	/*Creamos un ArrayList del tipo nombre valor para agregar los datos recibidos por los parametros anteriores
 	    	 * y enviarlo mediante POST a nuestro sistema para relizar la validacion*/ 
@@ -194,41 +193,12 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
 						}		            
 
 						//validamos el valor obtenido
-			    		 if (id==(-1)){
-			    			 Toast.makeText(getBaseContext(),
-										"Usuario incorrecto. ", Toast.LENGTH_SHORT)
-										.show();
-			    			 bandera=false;
-			    		 }
-			    		 else if (id==1){
-			    			 Toast.makeText(getBaseContext(),
-										"Usuario correcto llega al servicio. ", Toast.LENGTH_SHORT)
-										.show();
-			    			 bandera=true;
-			    		 }
-			    		 else{
-			    			 Toast.makeText(getBaseContext(),
-										"Ni puta idea de porque salta aqui", Toast.LENGTH_SHORT)
-										.show();
-			    			 bandera=false;
+			    		 if (id==1){   		    		
+			     			return "ok"; //login valido
 			    		 }
 
-				  }else{	//json obtenido invalido verificar parte WEB.
-					  Toast.makeText(getBaseContext(),
-								"JSON obtenido invalido.", Toast.LENGTH_SHORT)
-								.show();
-					  bandera=false;
-				  }
-			
-			
-			
-            
-			//enviamos y recibimos y analizamos los datos en segundo plano.
-    		if (bandera==true){    		    		
-    			return "ok"; //login valido
-    		}else{    		
-    			return "err"; //login invalido     	          	  
-    		}
+				  }   		
+    			return "err"; //login invalido 
         	
 		}
        
@@ -237,13 +207,13 @@ public class MainActivity   extends FragmentActivity implements OnMapClickListen
            
            if (result.equals("ok")){
 
-        	   Toast.makeText(getBaseContext(),
-						"LLegue al post execute bien", Toast.LENGTH_SHORT)
+        	   Toast.makeText(getApplicationContext(),
+						"Usuario correcto llega al servicio. ", Toast.LENGTH_SHORT)
 						.show();
 
             }else{
-            	Toast.makeText(getBaseContext(),
-						"Falle en el postexecute", Toast.LENGTH_SHORT)
+            	Toast.makeText(getApplicationContext(),
+						"Falla al conectar con el servicio", Toast.LENGTH_SHORT)
 						.show();
             }
             
